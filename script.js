@@ -2,11 +2,12 @@
 const messagesContainer = document.getElementById('messages');
 const userInput = document.getElementById('userInput');
 const sendButton = document.getElementById('sendButton');
+let tempUserText = '';
 
 function addMessage(text, isUser) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
-    messageDiv.textContent = text;
+    messageDiv.innerHTML = text;
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
@@ -23,6 +24,8 @@ async function sendMessage() {
     const userText = userInput.value.trim();
     if (userText === '') return;
 
+    tempUserText = userText;
+
     addMessage(userText, true);
     userInput.value = '';
 
@@ -31,7 +34,6 @@ async function sendMessage() {
     addMessage(botResponse, false);
 }
 
-// Выносим fetchWeather отдельно — так чище и понятнее
 async function fetchWeather() {
     const CITY = 'Novosibirsk';
     try {
@@ -50,6 +52,53 @@ async function fetchWeather() {
         return 'Не удалось получить данные о погоде';
     }
 }
+
+async function doFetch() {
+  let url = "https://ru.wikipedia.org/w/rest.php/v1/search/page";
+  let headers = {'Api-User-Agent': 'MediaWiki REST API docs examples/0.1 (https://www.mediawiki.org/wiki/API_talk:REST_API)'}
+  let params = {
+    'q': tempUserText,
+    'limit': '10'
+  };
+  let query = Object.keys(params)
+             .map(k => k + '=' + encodeURIComponent(params[k]))
+             .join('&');
+  url = url + '?' + query;
+
+  const rsp = await fetch(url, headers);
+  const data = await rsp.json();
+  return data;
+}
+
+async function fetchAsync()
+{
+            const responses = [
+            'Интересно! Расскажите подробнее.',
+            'Понял вас. Что ещё?',
+            'Хм, интересный вопрос. Дайте подумать...',
+            'Не совсем понял. Можете уточнить?',
+            'Это любопытно! А что ещё вы хотели бы узнать?'
+        ];
+
+  try {
+    let result = await doFetch();
+
+    const indexArrSearch = Math.floor(Math.random() * result.pages.length);
+
+    if (result?.pages[indexArrSearch]?.excerpt) {
+  return `${result?.pages[indexArrSearch]?.excerpt}...`;
+    } else {
+         return responses[Math.floor(Math.random() * responses.length)];
+    }
+
+  
+  } catch( err ) {
+
+        return responses[Math.floor(Math.random() * responses.length)];
+  }
+}
+
+
 
 
 async function getBotResponse(userMessage) {
@@ -409,14 +458,10 @@ async function getBotResponse(userMessage) {
        return await fetchWeather();
     
     } else {
-    
-        const responses = [
-            'Интересно! Расскажите подробнее.',
-            'Понял вас. Что ещё?',
-            'Хм, интересный вопрос. Дайте подумать...',
-            'Не совсем понял. Можете уточнить?',
-            'Это любопытно! А что ещё вы хотели бы узнать?'
-        ];
-        return responses[Math.floor(Math.random() * responses.length)];
+
+   console.log('input ', userInput);
+    console.log('tempUserText ', tempUserText);
+    return await fetchAsync();
+
     }
 }
