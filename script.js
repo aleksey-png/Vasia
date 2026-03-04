@@ -457,7 +457,15 @@ async function getBotResponse(userMessage) {
     } else if (lowerMessage.includes('температура') || lowerMessage.includes('температура в нск') || lowerMessage.includes('какая сейчас температура?')) {
        return await fetchWeather();
     
-    } else {
+    }
+    else if (lowerMessage.includes('запусти крестики нолики') || lowerMessage.includes('крестики нолики')) {
+       return window.location.href = 'game.html';
+       
+    }
+    else if (lowerMessage.includes('игра с ботом') || lowerMessage.includes('давай сыграем в игру')) {
+       return window.location.href = 'game-bot.html';
+       
+    }else {
 
    console.log('input ', userInput);
     console.log('tempUserText ', tempUserText);
